@@ -50,12 +50,14 @@ public class NumeroComplejo {
     {
         if (parteImaginaria < 0) {
             return parteReal + " " + parteImaginaria + "i";
+            //Si la parte imaginaria es cero simplemente no se imprime la parte imaginaria
         } else if (parteImaginaria == 0) {
             return parteReal + " ";
-
+            //Caso contrario donde parte real es cero simplemente no se imprime la parte real
         } else if (parteReal == 0) {
             return parteImaginaria + "i";
         }
+        //Si no se cumple ninguna simplemente se imprime todo
         return parteReal + " + " + parteImaginaria + "i";
 
     }
