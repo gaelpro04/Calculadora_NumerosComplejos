@@ -1,5 +1,7 @@
 import  javax.swing.*;
 import java.awt.*;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
 import java.util.ArrayList;
 
 //Clase que modela la interfaz de una calculadora compleja
@@ -14,127 +16,99 @@ public class CalculadoraCompleja {
 
     //Atributos de la GUI
     private JFrame frame;
-    private JPanel panelPrincipal, panelSuperior, panelInferior, panelOperaciones, panelNumeros, panelResultados, panelHistorial;
+    private JPanel panelPrincipal, panelSuperior, panelCentral, panelIzquierda;
+    private JComboBox operaciones;
     private JTextField lecturaNumeroComplejo1, lecturaNumeroComplejo2;
-    private JLabel labelNumeroComplejo1, labelNumeroComplejo2, labelResultadoEnunciado, labelResultado, labelOperaciones;
+    private JLabel labelNumeroComplejo1, labelNumeroComplejo2;
     private JButton botonResultado;
-    private ArrayList<JButton> botonesOperaciones;
+    private JTable tablaHistorial;
 
     /**
      * Constructor preterminado donde se incializan las variables y se crea la GUI
      */
     public CalculadoraCompleja() {
 
-        operacionElaborada = "";
-        calculadora = new ModeloCalculadora();
         historial = new AlmacenNumerosComplejos();
-        frame = new JFrame("Calculadora Compleja");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        calculadora = new ModeloCalculadora();
+
+        frame = new JFrame("Calculadora compleja");
         frame.setLayout(new BorderLayout());
 
-        //Panel superior(número complejo1, número complejo2 y resultado)
-        panelSuperior = new JPanel(new BorderLayout());
-        panelNumeros = new JPanel(new GridBagLayout());
-        panelNumeros.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        panelResultados = new JPanel(new GridBagLayout());
-        panelHistorial = new JPanel();
-        panelHistorial.setLayout(new GridLayout(100, 1));
-        panelHistorial.setBorder(BorderFactory.createLineBorder(Color.GRAY));
-        panelHistorial.add(new JLabel("Historial"));
+        panelPrincipal = new JPanel(new BorderLayout());
+        panelSuperior = new JPanel(new FlowLayout(FlowLayout.CENTER,5,5));
+        panelCentral = new JPanel();
+        panelCentral.setLayout(new GridBagLayout());
+        panelIzquierda = new JPanel();
+        panelIzquierda.setLayout(new BoxLayout(panelIzquierda, BoxLayout.Y_AXIS));
 
-        //Como Intellij no nos da mucha flexibilidad en cuestión de guis, se utiliza de gridBagConstraints, que nos deja
-        //manipular un poco más los componentes
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(5, 0, 5, 5);
+        lecturaNumeroComplejo1 = new JTextField(20);
+        lecturaNumeroComplejo1.setText("Escribe un número complejo");
+        lecturaNumeroComplejo1.setForeground(Color.GRAY);
+        lecturaNumeroComplejo1.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (lecturaNumeroComplejo1.getText().equals("Escribe un número complejo")) {
+                    lecturaNumeroComplejo1.setText("");
+                    lecturaNumeroComplejo1.setForeground(Color.BLACK);
+                }
+            }
 
-        //Label y TextField del número complejo 1
-        labelNumeroComplejo1 = new JLabel("Número complejo 1", SwingConstants.CENTER);
-        labelNumeroComplejo1.setPreferredSize(new Dimension(250, 15));
-        lecturaNumeroComplejo1 = new JTextField();
-        lecturaNumeroComplejo1.setPreferredSize(new Dimension(250, 70));
-        //Dirijimos la lectura del textField al método de lectura
-        lecturaNumeroComplejo1.addActionListener(lectura -> lecturaNumeroComplejo1());
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (lecturaNumeroComplejo1.getText().isEmpty()) {
+                    lecturaNumeroComplejo1.setText("Escribe un número complejo");
+                    lecturaNumeroComplejo1.setForeground(Color.GRAY);
+                }
+            }
+        });
 
-        //MOdificación de localización de los componentes
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panelNumeros.add(labelNumeroComplejo1, gbc);
-        gbc.gridy = 1;
-        panelNumeros.add(lecturaNumeroComplejo1, gbc);
+        lecturaNumeroComplejo2 = new JTextField(20);
+        lecturaNumeroComplejo2.setText("Escribe un número complejo");
+        lecturaNumeroComplejo2.setForeground(Color.GRAY);
+        lecturaNumeroComplejo2.addFocusListener(new FocusListener() {
+            @Override
+            public void focusGained(FocusEvent e) {
+                if (lecturaNumeroComplejo2.getText().equals("Escribe un número complejo")) {
+                    lecturaNumeroComplejo2.setText("");
+                    lecturaNumeroComplejo2.setForeground(Color.BLACK);
+                }
+            }
 
-        //Label y textField de la lectura del segundo nombre
-        labelNumeroComplejo2 = new JLabel("Número complejo 2", SwingConstants.CENTER);
-        labelNumeroComplejo2.setPreferredSize(new Dimension(250, 10));
-        lecturaNumeroComplejo2 = new JTextField();
-        lecturaNumeroComplejo2.setPreferredSize(new Dimension(250, 70));
-        lecturaNumeroComplejo2.addActionListener(lectura -> lecturaNumeroComplejo2());
+            @Override
+            public void focusLost(FocusEvent e) {
+                if (lecturaNumeroComplejo2.getText().isEmpty()) {
+                    lecturaNumeroComplejo2.setText("Escribe un número complejo");
+                    lecturaNumeroComplejo2.setForeground(Color.GRAY);
+                }
+            }
+        });
 
-        //Acomodo de componentes
-        gbc.gridy = 2;
-        panelNumeros.add(labelNumeroComplejo2, gbc);
-        gbc.gridy = 3;
-        panelNumeros.add(lecturaNumeroComplejo2, gbc);
+        operaciones = new JComboBox<>(new String[]{"+","-","x","÷"});
 
-        //Label(enunciado) y el labelResultado(donde se mostrará el resultado)
-        labelResultadoEnunciado = new JLabel("Resultado", SwingConstants.CENTER);
-        labelResultadoEnunciado.setPreferredSize(new Dimension(220, 10));
-        labelResultado = new JLabel("", SwingConstants.CENTER);
-        labelResultado.setOpaque(true);
-        labelResultado.setBackground(Color.WHITE);
-        labelResultado.setPreferredSize(new Dimension(220, 80));
-
-        //Botón que mostrará en el labelResultado el resultado
         botonResultado = new JButton("=");
-        botonResultado.setPreferredSize(new Dimension(50, 30));
-        botonResultado.setFocusPainted(false);
-        botonResultado.addActionListener(lectura -> botonResultado());
+        botonResultado.setPreferredSize(new Dimension(50,50));
 
-        //Acomodo de componentes de lado derecho
+        panelSuperior.add(lecturaNumeroComplejo1, SwingConstants.CENTER);
+        panelSuperior.add(operaciones, SwingConstants.CENTER);
+        panelSuperior.add(lecturaNumeroComplejo2, SwingConstants.CENTER);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 1;
         gbc.gridy = 0;
-        panelResultados.add(labelResultadoEnunciado, gbc);
-        gbc.gridy = 1;
-        panelResultados.add(labelResultado, gbc);
-        gbc.gridy = 2;
-        panelResultados.add(botonResultado, gbc);
-        panelSuperior.add(panelResultados, BorderLayout.EAST);
-        panelSuperior.add(panelNumeros, BorderLayout.WEST);
+        gbc.insets = new Insets(5,10,5,10);
 
-        //Panel inferior(operaciones)
-        panelInferior = new JPanel(new BorderLayout());
-        panelInferior.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        panelCentral.add(botonResultado, gbc);
 
-        //Botones de operaciones, donde se utiliza de un arreglo para asignar el contenido de los botones mas fácil
-        String[] operaciones = {"+", "-", "x", "÷"};
-        botonesOperaciones = new ArrayList<>();
-        panelOperaciones = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        int i = 0;
-        for (String operacion : operaciones) {
-            JButton boton = new JButton(operacion);
-            operacion = operaciones[i];
-            String finalOperacion = operacion;
-            boton.addActionListener(lectura -> getOperacion(finalOperacion));
-            panelOperaciones.add(boton);
-            botonesOperaciones.add(boton);
-            ++i;
-        }
+        panelPrincipal.add(panelSuperior, BorderLayout.CENTER);
+        panelPrincipal.add(panelCentral, BorderLayout.SOUTH);
+        panelPrincipal.add(panelIzquierda, BorderLayout.WEST);
 
-        //Botón reinicio, donde con el addActionListener, se va dirigido al método reiniciar
-        JButton botonReiniciar = new JButton("Reiniciar");
-        botonReiniciar.addActionListener(lectura -> reiniciar());
-        panelOperaciones.add(botonReiniciar);
-
-        labelOperaciones = new JLabel("OPERACIONES", SwingConstants.CENTER);
-        panelInferior.add(labelOperaciones, BorderLayout.NORTH);
-        panelInferior.add(panelOperaciones, BorderLayout.SOUTH);
-
-        //Agregar los paneles al frame
-        frame.add(panelHistorial, BorderLayout.EAST);
-        frame.add(panelSuperior, BorderLayout.NORTH);
-        frame.add(panelInferior, BorderLayout.SOUTH);
-        frame.setSize(700, 300);
-        frame.setLocationRelativeTo(null);
+        frame.add(panelPrincipal, BorderLayout.CENTER);
         frame.setVisible(true);
+        frame.setSize(500, 250);
+        frame.setLocationRelativeTo(null);
+
+
     }
 
     /**
@@ -275,19 +249,12 @@ public class CalculadoraCompleja {
             } else if (operacionElaborada.equals("÷")) {
                 resultado = calculadora.division(numeroComplejo1.getParteReal(), numeroComplejo1.getParteImaginaria(), numeroComplejo2.getParteReal(), numeroComplejo2.getParteImaginaria());
             } else if (operacionElaborada.isEmpty()) {
-                labelResultadoEnunciado.setText("Ingresa una operación valida");
             }
-            labelResultado.setText(String.valueOf(resultado));
 
-            panelHistorial.add(new JLabel(lecturaNumeroComplejo1.getText() + " " + operacionElaborada + " " + lecturaNumeroComplejo2.getText()), SwingConstants.CENTER);
-            panelHistorial.revalidate();
-            panelHistorial.repaint();
-            historial.guardar(stringToNumeroComplejo(lecturaNumeroComplejo1.getText()), stringToNumeroComplejo(lecturaNumeroComplejo2.getText()));
 
             //En dado caso que se null alguno simplemente se imprime una leyenda en el labelResultado enunciado que no es valido o
             //que ingrese uns numeros validos
         } else {
-            labelResultadoEnunciado.setText("Ingresa los números complejos");
             //Reiniciamos la operacionElaborada para que al momento que verdaderamente ingrese números validos, y no ingrese una operación
             //no imprima un valor no esperado.
             operacionElaborada = "";
@@ -305,7 +272,6 @@ public class CalculadoraCompleja {
         lecturaNumeroComplejo2.setEnabled(true);
         lecturaNumeroComplejo2.setText("");
         numeroComplejo2 = null;
-        labelResultado.setText("");
         operacionElaborada = "";
     }
 }

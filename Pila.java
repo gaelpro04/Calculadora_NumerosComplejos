@@ -6,7 +6,7 @@ public class Pila<T> {
     public Pila()
     {
         elementos = (T[]) new Object[10];
-        int tope = -1;
+        this.tope = -1;
     }
 
     public boolean pilaVacia()
@@ -32,6 +32,7 @@ public class Pila<T> {
             System.out.println("Pila vacia");
         } else {
             object = elementos[tope];
+            --tope;
         }
         return object;
     }
@@ -49,7 +50,7 @@ public class Pila<T> {
     private T[] redimensionar(int tope)
     {
         T[] elementosRedimensionados = (T[]) new Object[(tope+1)*2];
-        for (int i = 0; i < tope; i++) {
+        for (int i = 0; i <= tope; i++) {
             elementosRedimensionados[i] = elementos[i];
         }
         return elementosRedimensionados;
