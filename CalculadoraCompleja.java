@@ -1,4 +1,5 @@
 import  javax.swing.*;
+import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
@@ -16,11 +17,11 @@ public class CalculadoraCompleja {
 
     //Atributos de la GUI
     private JFrame frame;
-    private JPanel panelPrincipal, panelSuperior, panelCentral, panelIzquierda;
+    private JPanel panelPrincipal, panelSuperior, panelCentral, panelInferior;
     private JComboBox operaciones;
     private JTextField lecturaNumeroComplejo1, lecturaNumeroComplejo2;
     private JLabel labelNumeroComplejo1, labelNumeroComplejo2;
-    private JButton botonResultado;
+    private JButton botonResultado, botonUNDO;
     private JTable tablaHistorial;
 
     /**
@@ -33,16 +34,23 @@ public class CalculadoraCompleja {
 
         frame = new JFrame("Calculadora compleja");
         frame.setLayout(new BorderLayout());
+        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 
         panelPrincipal = new JPanel(new BorderLayout());
         panelSuperior = new JPanel(new FlowLayout(FlowLayout.CENTER,5,5));
         panelCentral = new JPanel();
         panelCentral.setLayout(new GridBagLayout());
-        panelIzquierda = new JPanel();
-        panelIzquierda.setLayout(new BoxLayout(panelIzquierda, BoxLayout.Y_AXIS));
+        panelCentral.setBorder(new LineBorder(Color.GRAY));
+
+        panelInferior = new JPanel();
+        panelInferior.setLayout(new BoxLayout(panelInferior, BoxLayout.X_AXIS));
+        panelInferior.setOpaque(true);
+        panelInferior.setBackground(Color.WHITE);
+        panelInferior.setPreferredSize(new Dimension(10,25));
 
         lecturaNumeroComplejo1 = new JTextField(20);
         lecturaNumeroComplejo1.setText("Escribe un número complejo");
+        lecturaNumeroComplejo1.setPreferredSize(new Dimension(100,100));
         lecturaNumeroComplejo1.setForeground(Color.GRAY);
         lecturaNumeroComplejo1.addFocusListener(new FocusListener() {
             @Override
@@ -64,6 +72,7 @@ public class CalculadoraCompleja {
 
         lecturaNumeroComplejo2 = new JTextField(20);
         lecturaNumeroComplejo2.setText("Escribe un número complejo");
+        lecturaNumeroComplejo2.setPreferredSize(new Dimension(100,100));
         lecturaNumeroComplejo2.setForeground(Color.GRAY);
         lecturaNumeroComplejo2.addFocusListener(new FocusListener() {
             @Override
@@ -87,6 +96,8 @@ public class CalculadoraCompleja {
 
         botonResultado = new JButton("=");
         botonResultado.setPreferredSize(new Dimension(50,50));
+        botonUNDO = new JButton("undo");
+        botonUNDO.setPreferredSize(new Dimension(70,50));
 
         panelSuperior.add(lecturaNumeroComplejo1, SwingConstants.CENTER);
         panelSuperior.add(operaciones, SwingConstants.CENTER);
@@ -98,16 +109,19 @@ public class CalculadoraCompleja {
         gbc.insets = new Insets(5,10,5,10);
 
         panelCentral.add(botonResultado, gbc);
+        panelCentral.add(botonUNDO);
 
-        panelPrincipal.add(panelSuperior, BorderLayout.CENTER);
-        panelPrincipal.add(panelCentral, BorderLayout.SOUTH);
-        panelPrincipal.add(panelIzquierda, BorderLayout.WEST);
+        panelInferior.add(new JLabel("When haces"));
+
+        panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
+        panelPrincipal.add(panelCentral, BorderLayout.CENTER);
+        panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
 
         frame.add(panelPrincipal, BorderLayout.CENTER);
+        frame.add(new JScrollPane(panelInferior), BorderLayout.SOUTH);
         frame.setVisible(true);
-        frame.setSize(500, 250);
+        frame.setSize(550, 210);
         frame.setLocationRelativeTo(null);
-
 
     }
 
