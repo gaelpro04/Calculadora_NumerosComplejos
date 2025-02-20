@@ -6,6 +6,7 @@ import java.util.ArrayList;
 public class CalculadoraCompleja {
 
     //Atributos lógicos(que hacen posible la resolución de los números)
+    private AlmacenNumerosComplejos historial;
     private ModeloCalculadora calculadora;
     private NumeroComplejo numeroComplejo1;
     private NumeroComplejo numeroComplejo2;
@@ -13,7 +14,7 @@ public class CalculadoraCompleja {
 
     //Atributos de la GUI
     private JFrame frame;
-    private JPanel panelPrincipal, panelSuperior, panelInferior, panelOperaciones, panelNumeros, panelResultados;
+    private JPanel panelPrincipal, panelSuperior, panelInferior, panelOperaciones, panelNumeros, panelResultados, panelHistorial;
     private JTextField lecturaNumeroComplejo1, lecturaNumeroComplejo2;
     private JLabel labelNumeroComplejo1, labelNumeroComplejo2, labelResultadoEnunciado, labelResultado, labelOperaciones;
     private JButton botonResultado;
@@ -26,6 +27,7 @@ public class CalculadoraCompleja {
 
         operacionElaborada = "";
         calculadora = new ModeloCalculadora();
+        historial = new AlmacenNumerosComplejos();
         frame = new JFrame("Calculadora Compleja");
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(new BorderLayout());
@@ -35,6 +37,10 @@ public class CalculadoraCompleja {
         panelNumeros = new JPanel(new GridBagLayout());
         panelNumeros.setBorder(BorderFactory.createLineBorder(Color.GRAY));
         panelResultados = new JPanel(new GridBagLayout());
+        panelHistorial = new JPanel();
+        panelHistorial.setLayout(new GridLayout(100, 1));
+        panelHistorial.setBorder(BorderFactory.createLineBorder(Color.GRAY));
+        panelHistorial.add(new JLabel("Historial"));
 
         //Como Intellij no nos da mucha flexibilidad en cuestión de guis, se utiliza de gridBagConstraints, que nos deja
         //manipular un poco más los componentes
@@ -123,9 +129,10 @@ public class CalculadoraCompleja {
         panelInferior.add(panelOperaciones, BorderLayout.SOUTH);
 
         //Agregar los paneles al frame
+        frame.add(panelHistorial, BorderLayout.EAST);
         frame.add(panelSuperior, BorderLayout.NORTH);
         frame.add(panelInferior, BorderLayout.SOUTH);
-        frame.setSize(500, 300);
+        frame.setSize(700, 300);
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
@@ -271,6 +278,11 @@ public class CalculadoraCompleja {
                 labelResultadoEnunciado.setText("Ingresa una operación valida");
             }
             labelResultado.setText(String.valueOf(resultado));
+
+            panelHistorial.add(new JLabel(lecturaNumeroComplejo1.getText() + " " + operacionElaborada + " " + lecturaNumeroComplejo2.getText()), SwingConstants.CENTER);
+            panelHistorial.revalidate();
+            panelHistorial.repaint();
+            historial.guardar(stringToNumeroComplejo(lecturaNumeroComplejo1.getText()), stringToNumeroComplejo(lecturaNumeroComplejo2.getText()));
 
             //En dado caso que se null alguno simplemente se imprime una leyenda en el labelResultado enunciado que no es valido o
             //que ingrese uns numeros validos
