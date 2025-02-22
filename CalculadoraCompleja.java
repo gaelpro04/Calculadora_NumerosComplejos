@@ -13,16 +13,13 @@ public class CalculadoraCompleja {
     private ModeloCalculadora calculadora;
     private NumeroComplejo numeroComplejo1;
     private NumeroComplejo numeroComplejo2;
-    private String operacionElaborada;
 
     //Atributos de la GUI
     private JFrame frame;
     private JPanel panelPrincipal, panelSuperior, panelCentral, panelInferior;
     private JComboBox operaciones;
     private JTextField lecturaNumeroComplejo1, lecturaNumeroComplejo2;
-    private JLabel labelNumeroComplejo1, labelNumeroComplejo2;
-    private JButton botonResultado, botonUNDO;
-    private JTable tablaHistorial;
+    private JButton botonResultado, botonUNDO, botonReiniciar;
 
     /**
      * Constructor preterminado donde se incializan las variables y se crea la GUI
@@ -43,15 +40,16 @@ public class CalculadoraCompleja {
         panelCentral.setBorder(new LineBorder(Color.GRAY));
 
         panelInferior = new JPanel();
-        panelInferior.setLayout(new BoxLayout(panelInferior, BoxLayout.X_AXIS));
+        panelInferior.setLayout(new BoxLayout(panelInferior, BoxLayout.Y_AXIS));
         panelInferior.setOpaque(true);
         panelInferior.setBackground(Color.WHITE);
-        panelInferior.setPreferredSize(new Dimension(10,25));
+        panelInferior.setPreferredSize(new Dimension(10,30));
 
         lecturaNumeroComplejo1 = new JTextField(20);
         lecturaNumeroComplejo1.setText("Escribe un número complejo");
         lecturaNumeroComplejo1.setPreferredSize(new Dimension(100,100));
         lecturaNumeroComplejo1.setForeground(Color.GRAY);
+        lecturaNumeroComplejo1.addActionListener(lectura -> lecturaNumeroComplejo1());
         lecturaNumeroComplejo1.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -74,6 +72,7 @@ public class CalculadoraCompleja {
         lecturaNumeroComplejo2.setText("Escribe un número complejo");
         lecturaNumeroComplejo2.setPreferredSize(new Dimension(100,100));
         lecturaNumeroComplejo2.setForeground(Color.GRAY);
+        lecturaNumeroComplejo2.addActionListener(lectura -> lecturaNumeroComplejo2());
         lecturaNumeroComplejo2.addFocusListener(new FocusListener() {
             @Override
             public void focusGained(FocusEvent e) {
@@ -96,12 +95,16 @@ public class CalculadoraCompleja {
 
         botonResultado = new JButton("=");
         botonResultado.setPreferredSize(new Dimension(50,50));
+        botonResultado.addActionListener(lectura -> botonResultado());
         botonUNDO = new JButton("undo");
         botonUNDO.setPreferredSize(new Dimension(70,50));
+        botonReiniciar = new JButton("Reiniciar");
+        botonReiniciar.setPreferredSize(new Dimension(50,50));
+        botonReiniciar.addActionListener(lectura -> reiniciar());
 
-        panelSuperior.add(lecturaNumeroComplejo1, SwingConstants.CENTER);
-        panelSuperior.add(operaciones, SwingConstants.CENTER);
         panelSuperior.add(lecturaNumeroComplejo2, SwingConstants.CENTER);
+        panelSuperior.add(operaciones, SwingConstants.CENTER);
+        panelSuperior.add(lecturaNumeroComplejo1, SwingConstants.CENTER);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 1;
@@ -111,14 +114,14 @@ public class CalculadoraCompleja {
         panelCentral.add(botonResultado, gbc);
         panelCentral.add(botonUNDO);
 
-        panelInferior.add(new JLabel("When haces"));
-
         panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
         panelPrincipal.add(panelCentral, BorderLayout.CENTER);
         panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
 
         frame.add(panelPrincipal, BorderLayout.CENTER);
-        frame.add(new JScrollPane(panelInferior), BorderLayout.SOUTH);
+        JScrollPane scrollPane = new JScrollPane(panelInferior);
+        scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        frame.add(scrollPane, BorderLayout.SOUTH);
         frame.setVisible(true);
         frame.setSize(550, 210);
         frame.setLocationRelativeTo(null);
@@ -155,6 +158,10 @@ public class CalculadoraCompleja {
             } else {
                 nuevoNumComplejo[1] = nuevoNumComplejo[1].replace("i","");
             }
+            //Ya por ultimo convertimos las String solamente con números a double
+            parteReal = Double.parseDouble(nuevoNumComplejo[0]);
+            parteImaginaria = Double.parseDouble(nuevoNumComplejo[1]);
+            
             //En dado caso que contenga un menos, se dirigirá aquí
         } else if (numeroComplejo.contains("-")) {
             //Se divide el posible número complejo
@@ -173,6 +180,10 @@ public class CalculadoraCompleja {
                 } else {
                     nuevoNumComplejo[1] = nuevoNumComplejo[1].replace("i","");
                 }
+                //Ya por ultimo convertimos las String solamente con números a double
+                parteReal = Double.parseDouble(nuevoNumComplejo[0]);
+                parteImaginaria = Double.parseDouble(nuevoNumComplejo[1]);
+                
                 //en dado caso que no este vacio el primer elemento, entonces la parte real es positiva
             } else {
                 //Verificamos lo mismo, si solamente se encuentra la i
@@ -182,16 +193,23 @@ public class CalculadoraCompleja {
                     nuevoNumComplejo[1] = nuevoNumComplejo[1].replace("i","");
                 }
                 nuevoNumComplejo[1] = "-" + nuevoNumComplejo[1];
+
+                //Ya por ultimo convertimos las String solamente con números a double
+                parteReal = Double.parseDouble(nuevoNumComplejo[0]);
+                parteImaginaria = Double.parseDouble(nuevoNumComplejo[1]);
             }
-            //Si no tiene ninguna operación simplemente no es valido y se entrea null
+
         } else {
-            return null;
+            if (numeroComplejo.contains("i")) {
+                numeroComplejo = numeroComplejo.replace("i","");
+                parteImaginaria = Double.parseDouble(numeroComplejo);
+                parteReal = 0;
+            } else {
+                parteReal = Double.parseDouble(numeroComplejo);
+                parteImaginaria = 0;
+            }
         }
-
-        //Ya por ultimo convertimos las String solamente con números a double
-        parteReal = Double.parseDouble(nuevoNumComplejo[0]);
-        parteImaginaria = Double.parseDouble(nuevoNumComplejo[1]);
-
+        
         return new NumeroComplejo(parteReal, parteImaginaria);
     }
 
@@ -200,21 +218,11 @@ public class CalculadoraCompleja {
      */
     private void lecturaNumeroComplejo1()
     {
-        //Se desactiva la faunción del textField, para que no pueda ingresar nada más y no ocasione errores
-        lecturaNumeroComplejo1.setEnabled(false);
-
         //Se crea una variable tipo String donde pueda almacenar el texto que escribió el usuario
         String numeroComplejoString = lecturaNumeroComplejo1.getText();
 
         //Se utiliza el método que convierte Strings a numeros complejos
         numeroComplejo1 = stringToNumeroComplejo(numeroComplejoString);
-
-        //En dado caso que el número complejo sea null(Muy probablemente ingreso algo invalido) simplemente
-        //se imprime un texto nuevo en el label de numerocomplejo1 que no es invalido, por ultimo se reinicia
-        if (numeroComplejo1 == null) {
-            labelNumeroComplejo1.setText("Debes ingresar un número valido");
-            reiniciar();
-        }
     }
 
     /**
@@ -222,26 +230,8 @@ public class CalculadoraCompleja {
      */
     private void lecturaNumeroComplejo2()
     {
-        //Al igual que con el método pasado, es básicamente lo mismo pero simplemente para el otro número complejo
-        lecturaNumeroComplejo2.setEnabled(false);
         String numeroCompleString = lecturaNumeroComplejo2.getText();
         numeroComplejo2 = stringToNumeroComplejo(numeroCompleString);
-
-        if (numeroComplejo2 == null) {
-            labelNumeroComplejo2.setText("Debes ingresar un número valido");
-            reiniciar();
-        }
-    }
-
-    /**
-     * Método para seleccionar la operación elegida por el usuario
-     * @param operacion
-     */
-    private void getOperacion(String operacion)
-    {
-        //Simplemente el atributo de operación se le asigna la entrada del usuario(que en este caso es el botón que eligió
-        // por lo tanto los botones van dirigidos aquí)
-        this.operacionElaborada = operacion;
     }
 
     /**
@@ -254,24 +244,26 @@ public class CalculadoraCompleja {
         NumeroComplejo resultado = null;
         //Si ningún número es null, entonces es valido para hacer la operación
         if (numeroComplejo1 != null && numeroComplejo2 != null) {
-            if (operacionElaborada.equals("+")) {
+            if (operaciones.getSelectedItem().equals("+")) {
                 resultado = calculadora.suma(numeroComplejo1.getParteReal(), numeroComplejo1.getParteImaginaria(), numeroComplejo2.getParteReal(), numeroComplejo2.getParteImaginaria());
-            } else if (operacionElaborada.equals("-")) {
+            } else if (operaciones.getSelectedItem().equals("-")) {
                 resultado = calculadora.resta(numeroComplejo1.getParteReal(), numeroComplejo1.getParteImaginaria(), numeroComplejo2.getParteReal(), numeroComplejo2.getParteImaginaria());
-            } else if (operacionElaborada.equals("x")) {
+            } else if (operaciones.getSelectedItem().equals("x")) {
                 resultado = calculadora.multiplicacion(numeroComplejo1.getParteReal(), numeroComplejo1.getParteImaginaria(), numeroComplejo2.getParteReal(), numeroComplejo2.getParteImaginaria());
-            } else if (operacionElaborada.equals("÷")) {
+            } else if (operaciones.getSelectedItem().equals("÷")) {
                 resultado = calculadora.division(numeroComplejo1.getParteReal(), numeroComplejo1.getParteImaginaria(), numeroComplejo2.getParteReal(), numeroComplejo2.getParteImaginaria());
-            } else if (operacionElaborada.isEmpty()) {
             }
+            panelInferior.add(new JLabel(numeroComplejo1 + " " + operaciones.getSelectedItem() + " " + numeroComplejo2 + " = " + resultado));
+            panelInferior.repaint();
+            panelInferior.revalidate();
+
+            lecturaNumeroComplejo2.setText("");
+            lecturaNumeroComplejo1.setText(resultado.toString());
+            lecturaNumeroComplejo1();
 
 
             //En dado caso que se null alguno simplemente se imprime una leyenda en el labelResultado enunciado que no es valido o
             //que ingrese uns numeros validos
-        } else {
-            //Reiniciamos la operacionElaborada para que al momento que verdaderamente ingrese números validos, y no ingrese una operación
-            //no imprima un valor no esperado.
-            operacionElaborada = "";
         }
     }
 
@@ -286,6 +278,6 @@ public class CalculadoraCompleja {
         lecturaNumeroComplejo2.setEnabled(true);
         lecturaNumeroComplejo2.setText("");
         numeroComplejo2 = null;
-        operacionElaborada = "";
+        panelInferior.removeAll();
     }
 }
