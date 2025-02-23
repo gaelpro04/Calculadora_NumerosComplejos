@@ -1,9 +1,15 @@
+
+//Clase que modela un almacen de numeros complejos y su resultado correspondiente(se utiliza pilas)
 public class AlmacenNumerosComplejos {
 
-    Pila<NumeroComplejo> numerosComplejos1;
-    Pila<NumeroComplejo> numerosComplejos2;
-    Pila<NumeroComplejo> resultados;
+    //Atributos de la clase
+    private Pila<NumeroComplejo> numerosComplejos1;
+    private Pila<NumeroComplejo> numerosComplejos2;
+    private Pila<NumeroComplejo> resultados;
 
+    /**
+     * Constructor preterminado
+     */
     public AlmacenNumerosComplejos()
     {
         numerosComplejos1 = new Pila<>();
@@ -11,6 +17,12 @@ public class AlmacenNumerosComplejos {
         resultados = new Pila<>();
     }
 
+    /**
+     * Método para guardar en las pilas los números correspondientes en paralelo
+     * @param numeroComplejo1
+     * @param numeroComplejo2
+     * @param resultado
+     */
     public void guardar(NumeroComplejo numeroComplejo1, NumeroComplejo numeroComplejo2, NumeroComplejo resultado)
     {
         numerosComplejos1.push(numeroComplejo1);
@@ -18,13 +30,33 @@ public class AlmacenNumerosComplejos {
         resultados.push(resultado);
     }
 
-    public NumeroComplejo undo()
+    /**
+     * Método para meter un resultado a la pila
+     * @param resultado
+     */
+    public void devolverResultado(NumeroComplejo resultado)
     {
-        numerosComplejos2.pop();
-        resultados.pop();
-        return numerosComplejos1.pop();
+        resultados.push(resultado);
     }
 
+    /**
+     * Método para vaciar un elemento de cada pila y otro de resultados
+     * @return
+     */
+    public NumeroComplejo undo()
+    {
+        resultados.pop();
+        numerosComplejos2.pop();
+        if (resultados.pilaVacia()) {
+            return numerosComplejos1.pop();
+        }
+        numerosComplejos1.pop();
+        return resultados.pop();
+    }
+
+    /**
+     * Método para borrar todo lo acumulado en la pila
+     */
     public void borrar()
     {
         while (!numerosComplejos1.pilaVacia() || !numerosComplejos2.pilaVacia() || !resultados.pilaVacia()) {
