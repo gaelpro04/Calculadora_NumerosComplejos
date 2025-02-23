@@ -1,18 +1,22 @@
-import  javax.swing.*;
+import javax.swing.*;
 import javax.swing.border.LineBorder;
 import java.awt.*;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.util.ArrayList;
+import java.util.Objects;
 
 //Clase que modela la interfaz de una calculadora compleja
 public class CalculadoraCompleja {
 
+    private JScrollPane scrollPane;
     //Atributos lógicos(que hacen posible la resolución de los números)
     private AlmacenNumerosComplejos historial;
     private ModeloCalculadora calculadora;
     private NumeroComplejo numeroComplejo1;
     private NumeroComplejo numeroComplejo2;
+    private ArrayList<String> ultimaOperacion;
+    private int ultimoIndexLabel;
 
     //Atributos de la GUI
     private JFrame frame;
@@ -28,6 +32,8 @@ public class CalculadoraCompleja {
 
         historial = new AlmacenNumerosComplejos();
         calculadora = new ModeloCalculadora();
+        ultimaOperacion = new ArrayList<>();
+        ultimoIndexLabel = -1;
 
         frame = new JFrame("Calculadora compleja");
         frame.setLayout(new BorderLayout());
@@ -43,7 +49,7 @@ public class CalculadoraCompleja {
         panelInferior.setLayout(new BoxLayout(panelInferior, BoxLayout.Y_AXIS));
         panelInferior.setOpaque(true);
         panelInferior.setBackground(Color.WHITE);
-        panelInferior.setPreferredSize(new Dimension(10,30));
+        panelInferior.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         lecturaNumeroComplejo1 = new JTextField(20);
         lecturaNumeroComplejo1.setText("Escribe un número complejo");
@@ -98,8 +104,9 @@ public class CalculadoraCompleja {
         botonResultado.addActionListener(lectura -> botonResultado());
         botonUNDO = new JButton("undo");
         botonUNDO.setPreferredSize(new Dimension(70,50));
+        botonUNDO.addActionListener(lectura -> botonUNDO());
         botonReiniciar = new JButton("Reiniciar");
-        botonReiniciar.setPreferredSize(new Dimension(50,50));
+        botonReiniciar.setPreferredSize(new Dimension(90,50));
         botonReiniciar.addActionListener(lectura -> reiniciar());
 
         panelSuperior.add(lecturaNumeroComplejo2, SwingConstants.CENTER);
@@ -109,22 +116,26 @@ public class CalculadoraCompleja {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 1;
         gbc.gridy = 0;
-        gbc.insets = new Insets(5,10,5,10);
+        gbc.insets = new Insets(5,5,5,5);
 
         panelCentral.add(botonResultado, gbc);
-        panelCentral.add(botonUNDO);
+        gbc.gridx = 2;
+        panelCentral.add(botonUNDO,gbc);
+        gbc.gridx = 3;
+        panelCentral.add(botonReiniciar, gbc);
 
         panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
         panelPrincipal.add(panelCentral, BorderLayout.CENTER);
-        panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
 
         frame.add(panelPrincipal, BorderLayout.CENTER);
-        JScrollPane scrollPane = new JScrollPane(panelInferior);
+        scrollPane = new JScrollPane(panelInferior);
         scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         frame.add(scrollPane, BorderLayout.SOUTH);
         frame.setVisible(true);
         frame.setSize(550, 210);
         frame.setLocationRelativeTo(null);
+        frame.pack();
 
     }
 
@@ -234,6 +245,44 @@ public class CalculadoraCompleja {
         numeroComplejo2 = stringToNumeroComplejo(numeroCompleString);
     }
 
+    public void botonUNDO()
+    {
+        numeroComplejo1 = historial.undo();
+        numeroComplejo2 = null;
+        lecturaNumeroComplejo1.setText(numeroComplejo1.toString());
+        lecturaNumeroComplejo1();
+        lecturaNumeroComplejo2.setText("");
+
+        Component[] componentes = panelInferior.getComponents();
+
+
+        for (int i = componentes.length - 1; i >= 0; --i) {
+            if (componentes[i] instanceof JLabel) {
+                JLabel label = (JLabel) componentes[i];
+                if (label.getText().equals(ultimaOperacion.getLast()) && i == componentes.length - 1) {
+                    panelInferior.remove(i);
+                    ultimoIndexLabel = i;
+                    System.out.println("ajasi");
+                    break;
+                } else if (i == componentes.length - 1) {
+                    panelInferior.remove(i);
+                    panelInferior.remove(i-1);
+                    ultimoIndexLabel = i-1;
+                    System.out.println("buenosi");
+                    break;
+                }
+            }
+        }
+
+        panelInferior.add(new JLabel(numeroComplejo1.toString()));
+        ultimaOperacion.remove(ultimaOperacion.getLast());
+        panelInferior.revalidate();
+        panelInferior.repaint();
+        scrollPane.repaint();
+        scrollPane.revalidate();
+        frame.pack();
+    }
+
     /**
      * Método utilizado para resolver la operación
      */
@@ -253,17 +302,26 @@ public class CalculadoraCompleja {
             } else if (operaciones.getSelectedItem().equals("÷")) {
                 resultado = calculadora.division(numeroComplejo1.getParteReal(), numeroComplejo1.getParteImaginaria(), numeroComplejo2.getParteReal(), numeroComplejo2.getParteImaginaria());
             }
+            if (ultimoIndexLabel != -1) {
+                panelInferior.remove(ultimoIndexLabel);
+                ultimoIndexLabel = -1;
+            }
+
             panelInferior.add(new JLabel(numeroComplejo1 + " " + operaciones.getSelectedItem() + " " + numeroComplejo2 + " = " + resultado));
+            ultimaOperacion.add(numeroComplejo1.toString() + " " + operaciones.getSelectedItem() + " " + numeroComplejo2.toString() + " = " + resultado);
+            System.out.println(numeroComplejo1 + " " + operaciones.getSelectedItem() + " " + numeroComplejo2 + " = " + resultado);
+            historial.guardar(numeroComplejo1, numeroComplejo2, resultado);
             panelInferior.repaint();
             panelInferior.revalidate();
-
+            scrollPane.repaint();
+            scrollPane.revalidate();
+            frame.pack();
             lecturaNumeroComplejo2.setText("");
+            numeroComplejo2 = null;
             lecturaNumeroComplejo1.setText(resultado.toString());
             lecturaNumeroComplejo1();
-
-
-            //En dado caso que se null alguno simplemente se imprime una leyenda en el labelResultado enunciado que no es valido o
-            //que ingrese uns numeros validos
+        } else {
+            System.out.println("errrrrror");
         }
     }
 
@@ -278,6 +336,12 @@ public class CalculadoraCompleja {
         lecturaNumeroComplejo2.setEnabled(true);
         lecturaNumeroComplejo2.setText("");
         numeroComplejo2 = null;
+        historial.borrar();
+        ultimaOperacion.clear();
+        ultimoIndexLabel = -1;
         panelInferior.removeAll();
+        panelInferior.repaint();
+        panelInferior.revalidate();
+        frame.pack();
     }
 }
