@@ -86,6 +86,4 @@ public class Pila<T> {
         }
         return elementosRedimensionados;
     }
-
-
 }
