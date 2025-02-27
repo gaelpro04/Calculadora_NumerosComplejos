@@ -40,18 +40,30 @@ public class AlmacenNumerosComplejos {
     }
 
     /**
-     * Método para vaciar un elemento de cada pila y otro de resultados
+     * Método para sacar el ultimo resultado guardado
      * @return
      */
-    public NumeroComplejo undo()
+    public NumeroComplejo undoResultado()
     {
-        resultados.pop();
-        numerosComplejos2.pop();
-        if (resultados.pilaVacia()) {
-            return numerosComplejos1.pop();
-        }
-        numerosComplejos1.pop();
         return resultados.pop();
+    }
+
+    /**
+     * Método para sacar el ultimo número complejo 1
+     * @return
+     */
+    public NumeroComplejo undoNumeroComplejo1()
+    {
+        return numerosComplejos1.pop();
+    }
+
+    /**
+     * Método para sacar el ultimo número complejo 2
+     * @return
+     */
+    public NumeroComplejo undoNumeroComplejo2()
+    {
+        return numerosComplejos2.pop();
     }
 
     /**

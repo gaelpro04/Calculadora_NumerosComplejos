@@ -297,21 +297,29 @@ public class CalculadoraCompleja {
      */
     public void botonUNDO()
     {
+        /*
+        Aquí se utiliza del método pop en la pila resultados
+         */
         //Tomamos el ultimo resultado en el número complejo 1, ya que este será nuestro nuevo numero complejo
-        numeroComplejo1 = historial.undo();
+        historial.undoResultado();
 
-        //Reseteamos el numero complejo 2 para que no haya ningún problema a la hora de regresar y que el usuario pique
-        //por error "="
-        numeroComplejo2 = null;
-
+        /*
+        Aquí utilizamos del método pop en la pila de numerosComplejos1
+         */
         //Metemos en el primer textfield el número complejo sacado del historial
-        lecturaNumeroComplejo1.setText(numeroComplejo1.toString());
+        lecturaNumeroComplejo1.setText(historial.undoNumeroComplejo1().toString());
+
 
         //Hacemos la lectura
         lecturaNumeroComplejo1();
 
+        /*
+        Aquí utilizamos del método pop en la pila de numerosComplejos2
+         */
         //Reseteamos el segundo textfield al igual como se hizo en el mismo numero complejo 2
-        lecturaNumeroComplejo2.setText("");
+        lecturaNumeroComplejo2.setText(historial.undoNumeroComplejo2().toString());
+
+        lecturaNumeroComplejo2();
 
         //Ciclo para buscar la ultima operación y eliminarla
         Component[] componentes = panelInferior.getComponents();
@@ -328,23 +336,9 @@ public class CalculadoraCompleja {
                     panelInferior.remove(i);
                     ultimoIndexLabel = i;
                     break;
-
-                    //En dado caso que no se cumpla quiere decir que solo hayun número complejo y solo se elimina y la operación anterior
-                } else if (i == componentes.length - 1) {
-                    panelInferior.remove(i);
-                    panelInferior.remove(i-1);
-                    ultimoIndexLabel = i-1;
-                    break;
                 }
             }
         }
-
-        //Metemos de nuevo el resultado sacado del undo de historial, para al momento que se quiera usar undo el resultado
-        //que saquemos sea este mismo que metimos
-        historial.devolverResultado(numeroComplejo1);
-
-        //Metemos este valor al panelInferior para hacer ilusión de que es el dato acumulado
-        panelInferior.add(new JLabel(numeroComplejo1.toString()));
 
         //Se borrá la ultima operación de la colección
         ultimaOperacion.remove(ultimaOperacion.getLast());
@@ -377,18 +371,13 @@ public class CalculadoraCompleja {
                 resultado = calculadora.division(numeroComplejo1.getParteReal(), numeroComplejo1.getParteImaginaria(), numeroComplejo2.getParteReal(), numeroComplejo2.getParteImaginaria());
             }
 
-            //Si el ultimo index label, es igual a menos 1 quiere decir que no se ha usado UNDO
-            //dado caso lo contrario, quiere decir que ya se uso, entoncesl ese residuo de valor acmulado que se queda se
-            //debe quitar para que se pueda poner la nueva operación en el historial
-            if (ultimoIndexLabel != -1) {
-                panelInferior.remove(ultimoIndexLabel);
-                ultimoIndexLabel = -1;
-            }
-
             //Se agrega la ultima operación al panel, además tambien en la colección de historial de operaciones.
             panelInferior.add(new JLabel(numeroComplejo1 + " " + operaciones.getSelectedItem() + " " + numeroComplejo2 + " = " + resultado));
             ultimaOperacion.add(numeroComplejo1.toString() + " " + operaciones.getSelectedItem() + " " + numeroComplejo2.toString() + " = " + resultado);
 
+            /*
+            Aquí se utiliza del método push para las tres pilas, donde guardamos la ultima operación que se acaba de hacer
+             */
             //Se guarda en el historial(utilizando pilas) los números complejos utilizados, además del resultado.
             historial.guardar(numeroComplejo1, numeroComplejo2, resultado);
 
